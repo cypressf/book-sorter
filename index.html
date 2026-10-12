@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Book Sorter</title>
+  <meta name="description" content="Search and filter Goodreads books, sorted by a Bayesian weighted rating.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <h1>Book Sorter</h1>
+    <p class="tag">Goodreads books, ranked by a rating that accounts for how many people rated them.</p>
+  </header>
+
+  <main>
+    <form id="controls" autocomplete="off" onsubmit="return false">
+      <div class="row search-row">
+        <input id="q" type="search" placeholder="Search title, author or series" aria-label="Search">
+      </div>
+
+      <div class="row">
+        <label class="grow">Sort by
+          <select id="sort">
+            <option value="weighted">Weighted rating</option>
+            <option value="rating">Average rating</option>
+            <option value="count">Most ratings</option>
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="short">Shortest</option>
+            <option value="long">Longest</option>
+          </select>
+        </label>
+        <button type="button" id="toggleFilters" class="btn" aria-expanded="false">Filters <span id="filterCount"></span></button>
+      </div>
+
+      <div id="filters" hidden>
+        <div class="field">
+          <span class="lbl">Genres (must have all)</span>
+          <div class="chips" id="incChips"></div>
+          <input id="incInput" list="genreList" placeholder="Add a genre…" aria-label="Add included genre">
+          <div class="quick" id="quickGenres"></div>
+        </div>
+
+        <div class="field">
+          <span class="lbl">Exclude genres</span>
+          <div class="chips" id="excChips"></div>
+          <input id="excInput" list="genreList" placeholder="Add a genre to hide…" aria-label="Add excluded genre">
+        </div>
+
+        <div class="grid">
+          <label>Min avg rating
+            <input id="minRating" type="number" inputmode="decimal" min="0" max="5" step="0.05" placeholder="any">
+          </label>
+          <label>Min # of ratings
+            <input id="minCount" type="number" inputmode="numeric" min="0" step="1000" placeholder="any">
+          </label>
+          <label>Published from
+            <input id="yearFrom" type="number" inputmode="numeric" placeholder="year">
+          </label>
+          <label>Published to
+            <input id="yearTo" type="number" inputmode="numeric" placeholder="year">
+          </label>
+          <label>Min pages
+            <input id="pagesMin" type="number" inputmode="numeric" min="0" placeholder="any">
+          </label>
+          <label>Max pages
+            <input id="pagesMax" type="number" inputmode="numeric" min="0" placeholder="any">
+          </label>
+          <label>Language
+            <select id="lang"><option value="">Any</option></select>
+          </label>
+          <label>Book type
+            <select id="type">
+              <option value="">All</option>
+              <option value="standalone">Standalone</option>
+              <option value="series">In a series</option>
+              <option value="first">First in series</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="field">Weighting strength
+          <select id="prior">
+            <option value="100">Light — trust small samples more</option>
+            <option value="1000">Medium</option>
+            <option value="10000">Strong — favor well-known books</option>
+            <option value="50000">Very strong</option>
+          </select>
+        </label>
+
+        <label class="check"><input id="bundles" type="checkbox" checked> Hide box sets, omnibuses &amp; sheet music</label>
+
+        <button type="button" id="reset" class="btn link">Reset all filters</button>
+      </div>
+      <datalist id="genreList"></datalist>
+    </form>
+
+    <p id="status" class="status" aria-live="polite">Loading books…</p>
+    <ol id="results" class="results"></ol>
+    <button type="button" id="more" class="btn wide" hidden>Show more</button>
+  </main>
+
+  <footer>
+    <p><strong>How the weighted rating works:</strong> each book's average is blended with the overall average
+      (<span id="meanRating">4.05</span>) as if it had extra "average" votes. Books with few ratings get pulled toward the middle;
+      books with many keep their real average. Formula: (n·r + m·C) ÷ (n + m), where m is the weighting strength.</p>
+    <p><strong>Data:</strong> ~46,000 books from the Goodreads "Best Books Ever" list, scraped in 2020
+      (<a href="https://doi.org/10.5281/zenodo.4265096">Casanova Lozano &amp; Costa Planells, CC BY-NC 4.0</a>).
+      Ratings are from that snapshot, so newer books and recent rating changes aren't included.
+      StoryGraph doesn't publish its data, so each book links to a StoryGraph search instead.
+      Not affiliated with Goodreads or StoryGraph.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
